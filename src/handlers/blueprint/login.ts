@@ -4,9 +4,7 @@ import { getAuthInfo } from ".";
 export const loginBlueprint = async (
   options: any
 ): Promise<string[] | null> => {
-  console.log(
-    chalk.gray("    Blueprint Authenticate with Username & Password")
-  );
+  console.log(chalk.gray("    Blueprint Authenticate"));
 
   const cookies = await getAuthInfo(options);
   if (!cookies) {

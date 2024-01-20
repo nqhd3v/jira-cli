@@ -1,14 +1,14 @@
 import { program } from "commander";
 import chalk from "chalk";
-import { loginJira } from "./handlers/jira";
 import { loginBlueprint } from "./handlers/blueprint/login";
 import { punchBlueprint } from "./handlers/blueprint/punch";
+import { jiraShowBoards } from "./services/jira/board";
+import { getJIRAAuthInfo } from "./handlers/jira";
 
 program
   .command("login")
   .argument("<app>", "Login to app: <'jira' | 'blueprint'>")
-  .option("-u, --user <USERNAME>", "Username")
-  .option("-p, --pass <PASSWORD>", "Password")
+  .option("-u, --user <USERNAME::PASSWORD>", "Username & Password")
   .option("-d, --debug", "Enable debug mode")
   .action(async (app: "jira" | "blueprint", options) => {
     if (app === "blueprint") {
@@ -16,7 +16,7 @@ program
       return;
     }
     if (app === "jira") {
-      await loginJira(options);
+      await getJIRAAuthInfo(options);
       return;
     }
     console.error(chalk.red("[!] Unknown app to login!"));
@@ -25,8 +25,7 @@ program
 program
   .command("blueprint")
   .argument("<action>", "Action for Blueprint: 'punch'")
-  .option("-u, --user <USERNAME>", "Username")
-  .option("-p, --pass <PASSWORD>", "Password")
+  .option("-u, --user <USERNAME::PASSWORD>", "Username & Password")
   .action(async (action, options) => {
     if (action === "punch") {
       await punchBlueprint(options);
@@ -38,8 +37,17 @@ program
 program
   .command("jira")
   .argument("<action>", "Action for JIRA: ")
-  .option("-u, --user <USERNAME>", "Username")
-  .option("-p, --pass <PASSWORD>", "Password")
-  .action(async (action, options) => {});
+  .argument("[option]", "Option for Action: 'show boards' | ''")
+  .option("-u, --user <USERNAME::PASSWORD>", "Username & Password to login")
+  .action(async (action, actionOpt, options) => {
+    if (action === "show") {
+      if (actionOpt === "boards") {
+        await jiraShowBoards(options);
+        return;
+      }
+      return;
+    }
+    console.error(chalk.red("[!] Unknown action for JIRA!"));
+  });
 
 program.parseAsync(process.argv);

@@ -5,7 +5,7 @@ import chalk from "chalk";
 export const getJiraMyself = async (
   username: string,
   password: string,
-  options?: TRequestHandlerOptions<any>
+  options?: TRequestHandlerOptions<TUserJira>
 ) =>
   await $jira(
     chalk.blue("Checking your JIRA authenticate data"),

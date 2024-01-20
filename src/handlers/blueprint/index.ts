@@ -5,6 +5,10 @@ import { CREDENTIAL_FILENAME } from "../../utils/constants";
 import { getUserByCookies } from "./user";
 import { $BLP_REQUEST } from "../../services/blueprint";
 
+export * from "./login";
+export * from "./punch";
+export * from "./user";
+
 const promptCmd = PromptSync();
 
 export const saveCredential = async (
@@ -44,12 +48,18 @@ export const getAuthInfo = async (options: any) => {
     username: "",
     password: "",
   };
-  if (options.user && options.pass) {
+  if (options.user && options.user.include("::")) {
+    const [optionUsername, optionPassword] = options.user.split("::");
     console.log(
-      chalk.yellow(" +  Using", options.user, chalk.yellow("-"), options.pass)
+      chalk.yellow(
+        " +  Using",
+        optionUsername,
+        chalk.yellow("-"),
+        optionPassword
+      )
     );
-    defaultAuth.username = options.user;
-    defaultAuth.password = options.pass;
+    defaultAuth.username = optionUsername;
+    defaultAuth.password = optionPassword;
   }
 
   // use default auth from file
@@ -64,7 +74,7 @@ export const getAuthInfo = async (options: any) => {
     promptCmd(
       chalk.yellow(
         " +  Username: " +
-          (credentialFile?.username ? `[${credentialFile.username}]` : "")
+          (credentialFile?.username ? `[${credentialFile.username}] ` : "")
       )
     );
   const password =
@@ -72,7 +82,7 @@ export const getAuthInfo = async (options: any) => {
     promptCmd(
       chalk.yellow(
         " +  Password: " +
-          (credentialFile?.password ? `[${credentialFile.password}]` : "")
+          (credentialFile?.password ? `[${credentialFile.password}] ` : "")
       )
     );
   if (
@@ -82,7 +92,11 @@ export const getAuthInfo = async (options: any) => {
     return null;
   }
 
-  return await $BLP_REQUEST.auth.LOGIN(username, password, {
-    debugMode: options && !!options.debug,
-  });
+  return await $BLP_REQUEST.auth.LOGIN(
+    username || credentialFile?.username || "",
+    password || credentialFile?.password || "",
+    {
+      debugMode: options && !!options.debug,
+    }
+  );
 };
